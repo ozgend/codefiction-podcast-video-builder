@@ -10,10 +10,8 @@
             "name": "Launch Program",
             "program": "${workspaceFolder}/cfv.js",
             "args": [
-                "--command",
-                "specs",
-                "--input",
-                "/Users/denolk/devMedia/video-cli-test/source/hangouts-cropped.mp4"
+                "--steps",
+                "/Users/denolk/devMedia/video-cli-test/sample-steps.txt"
             ]
         }
     ]

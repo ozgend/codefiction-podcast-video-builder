@@ -46,8 +46,8 @@ var Init = {
 
         if (args && Object.keys(args).length > 0) {
 
-            if (args['steps'] && fs.existsSync(args['steps'])) {
-                const stepsContent = fs.readFileSync(args['steps'], 'utf8');
+            if (args.steps && fs.existsSync(args.steps)) {
+                const stepsContent = fs.readFileSync(args.steps, 'utf8');
                 const eol = stepsContent.indexOf('\r\n') > 0 ? '\r\n' : '\n';
                 const steps = stepsContent.split(eol);
 
@@ -59,11 +59,11 @@ var Init = {
                         from: parse[1]
                     };
 
-                    if (parse.length == 3) {
+                    if (parse.length > 2) {
                         payload.to = parse[2];
                     }
 
-                    if (parse.length == 5) {
+                    if (parse.length > 3) {
                         payload.begin = parse[3];
                         payload.end = parse[4];
                     }
