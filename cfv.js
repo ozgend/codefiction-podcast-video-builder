@@ -63,7 +63,7 @@ App.run = async function (context) {
         else {
             result = await commandFn(payload);
             Log.debug('command: ', payload.command);
-            Log.info('result: ', result);
+            //Log.info('result: ', result);
         }
 
         context.results.push(result);

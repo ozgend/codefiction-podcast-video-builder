@@ -2,8 +2,8 @@
 const ffmpeg = 'ffmpeg';
 const ffprobe = 'ffprobe';
 const util = require('util');
-const runner = require('child_process');
-const exec = util.promisify(runner.exec);
+const exec = util.promisify(require('child_process').exec);
+const spawn = require('child_process').exec;
 const Log = require('./log');
 
 class VideoHandler {
@@ -18,43 +18,43 @@ class VideoHandler {
         const lengthSeconds = endSeconds - startSeconds;
         const lengthTimeMarker = lengthSeconds.asTimeMarker();
         const command = `${ffmpeg} -ss ${payload.begin} -i ${payload.from} -t ${lengthTimeMarker} -vcodec copy -acodec copy ${payload.to}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async v2mts(payload) {
         const command = `${ffmpeg} -i ${payload.from} -q 0 ${payload.to}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async v2mp4(payload) {
         const command = `${ffmpeg} -i ${payload.from} -c:v copy -c:a aac ${payload.to}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async genlist(payload) {
         const command = `for f in ${payload.from}; do echo "file '$f'" >> ${payload.to}; done`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async concat(payload) {
         const command = `${ffmpeg} -f concat -safe 0 -i ${payload.from} -c copy ${payload.to}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async fprobe(payload) {
         const command = `${ffmpeg} -i ${payload.from}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async probe(payload) {
         const command = `${ffprobe} -i ${payload.from}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
@@ -74,29 +74,54 @@ class VideoHandler {
 
     async info(payload) {
         const command = `${ffprobe} -v quiet -print_format json -show_format -show_streams ${payload.from}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
     async unwrapped(payload) {
         const command = `${ffmpeg} ${payload.from}`;
-        const result = await this.executeNative(command);
+        const result = await this.executeNative(command, payload);
         return result;
     }
 
-    async executeNative(commandString) {
-        Log.info('VideoHandler');
+    async executeNative(commandString, payload) {
+        Log.debug('.executeNative.');
 
-        const { stderr, stdout } = await exec(commandString);
-        let result = { stdout, stderr, success: true };
+        return new Promise(function (resolve) {
+            const task = spawn(commandString);
+            let result = { stdout: '', stderr: '', success: true };
 
-        if (stderr) {
-            Log.error(`error: ${stderr}`);
-            result.success = false;
-        }
+            task.stdout.on('data', (data) => {
+                Log.info(`  ${payload.command}  ${data}`);
+                result.stdout += data;
+            });
 
-        Log.debug(`${stdout}`);
-        return result;
+            task.stderr.on('data', (data) => {
+                result.stderr += data;
+                Log.error(`  ${payload.command}  ${data}`);
+            });
+
+            task.on('close', (code) => {
+                result.success = result.stderr.length > 0;
+                result.code = code;
+                resolve(result);
+            });
+
+            task.on('error', (err) => {
+                result.err = err;
+                resolve(result);
+            });
+        });
+
+        // -- woking
+        // const { stdout, stderr } = await exec(commandString);
+        // let result = { stdout, stderr, success: true };
+
+        // if (stderr) {
+        //     result.success = false;
+        // }
+
+        // return result;
     }
 }
 
