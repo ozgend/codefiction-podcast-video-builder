@@ -2,7 +2,7 @@
 const ffmpeg = 'ffmpeg';
 const ffprobe = 'ffprobe';
 const util = require('util');
-const runner = require('child_process'); 
+const runner = require('child_process');
 const exec = util.promisify(runner.exec);
 const Log = require('./log');
 
@@ -74,6 +74,12 @@ class VideoHandler {
 
     async info(payload) {
         const command = `${ffprobe} -v quiet -print_format json -show_format -show_streams ${payload.from}`;
+        const result = await this.executeNative(command);
+        return result;
+    }
+
+    async unwrapped(payload) {
+        const command = `${ffmpeg} ${payload.from}`;
         const result = await this.executeNative(command);
         return result;
     }
