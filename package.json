@@ -1,0 +1,17 @@
+{
+  "name": "cf-video-ci",
+  "version": "1.0.0",
+  "description": "simple video pipeline for codefiction podcast",
+  "main": "index.js",
+  "scripts": {},
+  "author": "ozgend",
+  "repository": "git@github.com:ozgend/codefiction-podcast-video-builder.git",
+  "license": "ISC",
+  "dependencies": {
+    "command-exists": "^1.2.8",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.14.1"
+  }
+}
