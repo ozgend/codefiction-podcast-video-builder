@@ -6,7 +6,7 @@
 
 1. extract section of raw video for given timestamps in `[hh:mm:ss]`
     ```sh
-    node cfv --command extract --from ./source/hangouts-raw.smp4 --begin [BEGIN] --end [END] --to ./source/hangouts-extract.mp4
+    node cfv --command extract --from ./source/hangouts-raw.mp4 --begin [BEGIN] --end [END] --to ./source/hangouts-extract.mp4
     ```
     ```sh
     ffmpeg -ss [START] -i ./source/hangouts-raw.mp4 -t [LENGTH] -vcodec copy -acodec copy ./source/hangouts-extract.mp4
@@ -14,12 +14,11 @@
 
 2. convert hangouts-extracted video to `mts`
     ```sh
-    node cfv --command v2mts --from ./source/hangouts-raw.mp4 --to ./merge/record.mts
+    node cfv --command v2mts --from ./source/hangouts-extract.mp4 --to ./merge/record.mts
     ```
     ```sh
     ffmpeg -i ./source/hangouts-extracted.mp4 -q 0 ./merge/record.mts
     ```
-
 
 3. convert intro video to `mts`
     convert hangouts-extracted video to `mts`

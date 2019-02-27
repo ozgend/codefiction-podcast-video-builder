@@ -2,7 +2,8 @@
 const ffmpeg = 'ffmpeg';
 const ffprobe = 'ffprobe';
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const runner = require('child_process'); 
+const exec = util.promisify(runner.exec);
 const Log = require('./log');
 
 class VideoHandler {
@@ -40,7 +41,7 @@ class VideoHandler {
     }
 
     async concat(payload) {
-        const command = `${ffmpeg} -f concat -i ${payload.from} -c copy ${payload.to}`;
+        const command = `${ffmpeg} -f concat -safe 0 -i ${payload.from} -c copy ${payload.to}`;
         const result = await this.executeNative(command);
         return result;
     }
@@ -80,7 +81,7 @@ class VideoHandler {
     async executeNative(commandString) {
         Log.info('VideoHandler');
 
-        const { stdout, stderr } = await exec(commandString);
+        const { stderr, stdout } = await exec(commandString);
         let result = { stdout, stderr, success: true };
 
         if (stderr) {
