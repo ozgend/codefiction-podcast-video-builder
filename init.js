@@ -35,6 +35,7 @@ var Init = {
         Log.info('- ffprobe ', ffprobe);
 
         let context = {
+            appName,
             env,
             ffmpeg: ffmpeg,
             ffprobe: ffprobe,

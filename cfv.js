@@ -4,10 +4,10 @@ const Init = require('./init');
 const Log = require('./log');
 const VideoHandler = require('./video-handler');
 const App = {};
+
 let progressPid = -1;
 
 Log.pretty = true;
-
 
 App.init = async function () {
     const context = Init.setup('cf-video-ci');
@@ -16,17 +16,15 @@ App.init = async function () {
 
     if (!context.payloads || context.payloads.length == 0) {
         Log.error('- payload not set');
-        process.exit(-1);
+        App.exit();
     }
 
     if (!context.ffmpeg) {
         Log.error('- ffmpeg not found');
-        process.exit(-1);
+        App.exit();
     }
 
-    setInterval(() => {
-        Log.progress('++ App.progress X ');
-    }, 100);
+    Log.getTimer(context.appName);
 
     return context;
 }
@@ -41,14 +39,17 @@ App.run = async function (context) {
 
     const videoHandler = new VideoHandler(context);
     let payload;
+    let progressUid;
 
     progressPid = setInterval(() => {
         if (!payload) {
             Log.progress('++ Preparing ++');
         }
         else {
-            let time = Log.timer('iup_' + payload.command);
-            Log.progress('++ App.progress [[' + payload.command + ']] @ elapsed ' + time + ' secs.  ++');
+            progressUid = `iup_${payload.command}`;
+            let commandTime = Log.getTimer(progressUid).toFixed(2);
+            let appTime = Log.getTimer(context.appName).toFixed(2);
+            Log.progress(`++ App.running ${appTime} secs. || command ${commandTime} secs :: [${payload.command}: ${payload.from}] ++`);
         }
     }, 100);
 
@@ -58,7 +59,7 @@ App.run = async function (context) {
         let result = -1;
 
         if (!commandFn) {
-            Log.error('command not supported [' + payload.command + ']');
+            Log.error(`command not supported [${payload.command}]`);
         }
         else {
             result = await commandFn(payload);
@@ -66,9 +67,11 @@ App.run = async function (context) {
             //Log.info('result: ', result);
         }
 
+        result.runtime = Log.getTimer(progressUid).toFixed(2);
+        result.command = payload.command;
         context.results.push(result);
-
-        Log.timer('iup_' + payload.command, true);
+        
+        Log.endTimer(progressUid);
     }
 
     return context;
@@ -81,7 +84,14 @@ App.done = async function (context) {
 }
 
 App.exit = function (context) {
+    if (!context) {
+        process.exit(-1);
+    }
     clearInterval(progressPid);
+
+    const elapsed = context.results.map(r => { return { command: r.command, runtime: `${r.runtime} secs` }; });
+    Log.table(elapsed);
+
     var errors = context.results.filter(r => r.success == false) || [];
     process.exit(errors.length)
 }

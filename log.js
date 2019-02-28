@@ -24,19 +24,21 @@ var Log = {
         }
     },
 
-    timer: function (uid, end) {
-        if (end) {
-            const value = _timers[uid]
-            delete _timers[uid];
-            return value;
-        }
-
-        if (_timers[uid]) {
-            return (Date.now() - _timers[uid]) / 1000;
-        }
-        else {
+    getTimer: function (uid) {
+        if (!_timers[uid]) {
             _timers[uid] = new Date();
         }
+
+        return ((Date.now() - _timers[uid]) / 1000);
+    },
+
+    endTimer: function (uid) {
+        let time = 0;
+        if (_timers[uid]) {
+            time = _timers[uid];
+            delete _timers[uid];
+        }
+        return time;
     },
 
     log: function (...logArgs) {
