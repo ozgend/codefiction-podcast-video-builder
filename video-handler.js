@@ -102,41 +102,42 @@ class VideoHandler {
     async executeNative(commandString, payload) {
         Log.debug('.executeNative.');
 
-        return new Promise(function (resolve) {
-            const task = spawn(commandString);
-            let result = { stdout: '', stderr: '', success: true };
+        // -- buffered + promise
+        // return new Promise(function (resolve) {
+        //     const task = spawn(commandString);
+        //     let result = { stdout: '', stderr: '', success: true };
 
-            task.stdout.on('data', (data) => {
-                Log.info(`  ${payload.command}  ${data}`);
-                result.stdout += data;
-            });
+        //     task.stdout.on('data', (data) => {
+        //         Log.info(`  ${payload.command}  ${data}`);
+        //         result.stdout += data;
+        //     });
 
-            task.stderr.on('data', (data) => {
-                result.stderr += data;
-                Log.error(`  ${payload.command}  ${data}`);
-            });
+        //     task.stderr.on('data', (data) => {
+        //         result.stderr += data;
+        //         Log.error(`  ${payload.command}  ${data}`);
+        //     });
 
-            task.on('close', (code) => {
-                result.success = result.stderr.length > 0;
-                result.code = code;
-                resolve(result);
-            });
+        //     task.on('close', (code) => {
+        //         result.success = result.stderr.length > 0;
+        //         result.code = code;
+        //         resolve(result);
+        //     });
 
-            task.on('error', (err) => {
-                result.err = err;
-                resolve(result);
-            });
-        });
+        //     task.on('error', (err) => {
+        //         result.err = err;
+        //         resolve(result);
+        //     });
+        // });
 
-        // -- woking
-        // const { stdout, stderr } = await exec(commandString);
-        // let result = { stdout, stderr, success: true };
+        // -- unbuffered + async
+        const { stdout, stderr } = await exec(commandString);
+        let result = { stdout, stderr, success: true };
 
-        // if (stderr) {
-        //     result.success = false;
-        // }
+        if (stderr) {
+            result.success = false;
+        }
 
-        // return result;
+        return result;
     }
 }
 
