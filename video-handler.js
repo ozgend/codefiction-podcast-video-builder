@@ -1,4 +1,5 @@
 'use-strict';
+
 const ffmpeg = 'ffmpeg';
 const ffprobe = 'ffprobe';
 const util = require('util');
@@ -19,19 +20,19 @@ class VideoHandler {
         const endSeconds = payload.end.asTotalSecods();
         const lengthSeconds = endSeconds - startSeconds;
         const lengthTimeMarker = lengthSeconds.asTimeMarker();
-        const command = `${ffmpeg} -ss ${payload.begin} -i ${payload.from} -t ${lengthTimeMarker} -vcodec copy -acodec copy ${payload.to}`;
+        const command = `${ffmpeg} -y -ss ${payload.begin} -i ${payload.from} -t ${lengthTimeMarker} -vcodec copy -acodec copy ${payload.to}`;
         const result = await this.executeNative(command, payload);
         return result;
     }
 
     async v2mts(payload) {
-        const command = `${ffmpeg} -i ${payload.from} -q 0 ${payload.to}`;
+        const command = `${ffmpeg} -y -i ${payload.from} -q 0 ${payload.to}`;
         const result = await this.executeNative(command, payload);
         return result;
     }
 
     async v2mp4(payload) {
-        const command = `${ffmpeg} -i ${payload.from} -c:v copy -c:a aac ${payload.to}`;
+        const command = `${ffmpeg} -y -i ${payload.from} -c:v copy -c:a aac ${payload.to}`;
         const result = await this.executeNative(command, payload);
         return result;
     }
@@ -56,7 +57,7 @@ class VideoHandler {
     }
 
     async concat(payload) {
-        const command = `${ffmpeg} -f concat -safe 0 -i ${payload.from} -c copy ${payload.to}`;
+        const command = `${ffmpeg} -y -f concat -safe 0 -i ${payload.from} -c copy ${payload.to}`;
         const result = await this.executeNative(command, payload);
         return result;
     }
