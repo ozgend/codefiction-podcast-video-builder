@@ -1,8 +1,26 @@
-    notes
-        - all sources must be in 720p30fps or 1080p30fps mp4 format
-        - mts conversion required to maintain concat timeframe sync 
+## codefiction-podcast-video-builder
+ffmpeg nodejs cli wrapper to extract, concat and deploy codefiction podcast videos
 
-## cfv / ffmpeg commands
+----
+
+## batch steps
+
+cfv can be run with steps file provided with sequental commands, one per-line with ordered and pipe delimited arguments: 
+```sh
+node cfv --steps /absolute/path/to/steps_file.txt
+```
+
+    contents of [/absolute/path/to/steps_file.txt]
+
+    extract | /workdir/source/hangouts-raw.mp4 | /workdir/source/hangouts-extract.mp4 | 00:01:29 | 00:47:24
+    v2mts | /workdir/source/hangouts-extract.mp4 | /workdir/merge/record.mts
+    v2mts | /workdir/source/intro.mp4 | /workdir/merge/intro.mts
+    genlist | /workdir/merge/*.mts | /workdir/merge/files.txt
+    concat | /workdir/merge/files.txt | /workdir/output/output.mts
+    v2mp4 | /workdir/output/output.mts | /workdir/output/output.mp4
+
+
+## single cfv / ffmpeg commands
 
 1. extract section of raw video for given timestamps in `[hh:mm:ss]`
     ```sh
@@ -57,3 +75,16 @@
     ffmpeg -i ./output/output.mts -c:v copy -c:a aac ./output/output.mp4
     ```
 
+## notes
+- ffmpeg must be installed (https://www.ffmpeg.org/download.html)
+- all sources must be in 720p30fps or 1080p30fps mp4 format
+- mts conversion required to maintain concat timeframe sync 
+
+
+## todo
+- introduce fadein, fadeout and crossfade filters
+- download from source (s3, youtube)
+- generate meta and content analyse
+- publish to youtube with meta and description
+- source transformation
+- default timeframe sync without mts
