@@ -3,6 +3,8 @@ const ffmpeg = 'ffmpeg';
 const ffprobe = 'ffprobe';
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const fs = require('fs');
+const path = require('path');
 const spawn = require('child_process').exec;
 const Log = require('./log');
 
@@ -35,8 +37,21 @@ class VideoHandler {
     }
 
     async genlist(payload) {
-        const command = `for f in ${payload.from}; do echo "file '$f'" >> ${payload.to}; done`;
-        const result = await this.executeNative(command, payload);
+        let result = {
+            directory: path.dirname(payload.from),
+            extension: path.extname(payload.from),
+            success: true
+        };
+
+        result.files = fs.readdirSync(result.directory, 'utf8');
+
+        if (result.extension) {
+            result.files = result.files.filter(f => f.toLocaleLowerCase().indexOf(result.extension.toLocaleLowerCase()) > 0);
+        }
+
+        const content = result.files.map(f => `file '${result.directory}${path.sep}${f.toLocaleLowerCase()}'`).join('\n');
+        fs.writeFileSync(payload.to, content, { encoding: 'utf8', flag: 'w' });
+
         return result;
     }
 
